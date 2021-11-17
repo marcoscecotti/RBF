@@ -5,3 +5,5 @@ perceptrón simple o multicapa, dependiendo de la cantidad de clases de salida.
 Además se realiza un entrenamiento con un perceptrón multicapa para comparar las velocidades de ejecución de ambos algoritmos y su tasa de acierto.
 
 Para el conjunto de datos XOR, se grafica la distribución de los datos y cómo se ajustan los centroides por el método de k-medias:
+
+![Image text](https://github.com/marcoscecotti/RBF/blob/main/datos/k-medias.png)
