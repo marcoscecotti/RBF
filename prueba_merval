@@ -1,0 +1,51 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from kMedias import kMedias
+from funcionRadial import funcionRadial
+from perceptronSimpleMerval import perceptronSimpleMerval
+import time
+
+# Ejercicio 2
+#Leo el archivo CSV y hago una particion para test y train
+df = 'icgtp2datos/merval.csv'
+datosMerval = np.loadtxt(df, delimiter = ',')
+nuevaData = []
+cantDatos = len(datosMerval)
+cont = 0
+for i in range(cantDatos-5):
+  aux = datosMerval[i:i+6]
+  aux = np.transpose(aux)
+  nuevaData.insert(cont,aux)
+  cont=cont+1
+
+nuevaData_df = pd.DataFrame(nuevaData)
+
+# Definicion
+cantNeuronas = 10
+cantSalidas = 1
+XTrain = nuevaData_df.iloc[:, 0:-1 * cantSalidas].to_numpy()
+yTrain = nuevaData_df.iloc[:, -1*cantSalidas:].to_numpy()
+
+inicioBRF = time.time()
+# Capa radial
+centroides = kMedias(XTrain, cantNeuronas)
+desvio=1000
+salidasTrain = funcionRadial(XTrain, centroides,desvio, cantNeuronas)
+
+# Train
+W, error, y = perceptronSimpleMerval(salidasTrain,yTrain)
+yNuevo = np.zeros((len(yTrain),1))
+for i in range(len(yTrain)):
+  yNuevo[i][0] = y[i]
+
+plt.figure(1)
+x = np.linspace(0,100,len(yTrain))
+print(x)
+plt.plot(x,yTrain,color="green")
+plt.plot(x,yNuevo,color="red")
+
+plt.figure(2)
+x = np.linspace(0,100,len(error))
+plt.plot(x,error)
+plt.show()
