@@ -1,0 +1,90 @@
+from kMedias import kMedias
+from funcionRadial import funcionRadial
+from perceptronSimple import perceptronSimple
+from testSimple import test
+from trainMLP import perceptronMulticapa
+from testMLP import testIris
+from particion import particion
+import pandas as pd
+import time
+import matplotlib.pyplot as plt
+
+Train = pd.read_csv('datos/XOR_trn.csv', header=None)
+Test = pd.read_csv('datos/XOR_tst.csv', header=None)
+cantSalidas = 1
+cantNeuronas = 4
+XTrain = Train.iloc[:, 0:-1 * cantSalidas].to_numpy()
+yTrain = Train.iloc[:, -1*cantSalidas:].to_numpy()
+XTest = Test.iloc[:, 0:-1 * cantSalidas].to_numpy()
+yTest = Test.iloc[:, -1*cantSalidas:].to_numpy()
+
+t = time.time()
+centroides = kMedias(XTrain, cantNeuronas)
+desvio = 1
+xTrainRBF = funcionRadial(XTrain, centroides, desvio, cantNeuronas)
+xTestRBF = funcionRadial(XTest,centroides,desvio,cantNeuronas)
+
+W, tasaAciertoTrainRBF = perceptronSimple(xTrainRBF,yTrain)
+tasaAciertoTestRBF = test(xTestRBF,yTest,W)
+print("--------------------------------")
+print("Resultados para XOR")
+print("--------------------------------")
+print("Tasa de acierto train RBF: ", tasaAciertoTrainRBF)
+print("Tasa de acierto test RBF: ", tasaAciertoTestRBF)
+print("Tiempo: ",time.time()-t)
+
+capas = [2,1]
+t = time.time()
+W, tasaAciertoTrainMLP = perceptronMulticapa(XTrain,yTrain,capas,1)
+tasaAciertoTestMLP = testIris(XTest,yTest,W,capas,1)
+print("Tasa de acierto train MLP: ", tasaAciertoTrainMLP)
+print("Tasa de acierto test MLP: ", tasaAciertoTestMLP)
+print("Tiempo: ",time.time()-t)
+
+# Graficar entradas y centroides
+plt.title('kMedias')
+plt.xlabel("X1")
+plt.ylabel("X2")
+cantEntradas = len(XTrain)
+for i in range(cantEntradas):
+    plt.scatter(XTrain[i][0],XTrain[i][1],marker='.',c='black')
+
+for i in range(cantNeuronas):
+    plt.scatter(centroides[i][0], centroides[i][1], marker='*', c='red')
+
+plt.show()
+
+df = pd.read_csv('datos/irisbin.csv', header=None)
+indicesTrain, indicesTest = particion(df, 0.2)
+Train = df.iloc[indicesTrain]
+Test = df.iloc[indicesTest]
+cantSalidas = 3
+cantNeuronas = 10
+XTrain = Train.iloc[:, 0:-1 * cantSalidas].to_numpy()
+yTrain = Train.iloc[:, -1*cantSalidas:].to_numpy()
+XTest = Test.iloc[:, 0:-1 * cantSalidas].to_numpy()
+yTest = Test.iloc[:, -1*cantSalidas:].to_numpy()
+
+t = time.time()
+centroides = kMedias(XTrain, cantNeuronas)
+desvio = 1
+xTrainRBF = funcionRadial(XTrain, centroides, desvio, cantNeuronas)
+xTestRBF = funcionRadial(XTest,centroides,desvio,cantNeuronas)
+
+capas=[3]
+W, tasaAciertoTrainRBF = perceptronMulticapa(xTrainRBF,yTrain,capas,2)
+tasaAciertoTestRBF = testIris(xTestRBF,yTest,W,capas,2)
+print("--------------------------------")
+print("Resultados para Iris")
+print("--------------------------------")
+print("Tasa de acierto train RBF: ", tasaAciertoTrainRBF)
+print("Tasa de acierto test RBF: ", tasaAciertoTestRBF)
+print("Tiempo: ",time.time()-t)
+
+capas = [3,2,3]
+t = time.time()
+W, tasaAciertoTrainMLP = perceptronMulticapa(XTrain,yTrain,capas,2)
+tasaAciertoTestMLP = testIris(XTest,yTest,W,capas,2)
+print("Tasa de acierto train MLP: ", tasaAciertoTrainMLP)
+print("Tasa de acierto test MLP: ", tasaAciertoTestMLP)
+print("Tiempo: ",time.time()-t)
