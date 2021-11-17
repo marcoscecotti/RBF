@@ -8,7 +8,7 @@ import time
 
 # Ejercicio 2
 #Leo el archivo CSV y hago una particion para test y train
-df = 'icgtp2datos/merval.csv'
+df = 'datos/merval.csv'
 datosMerval = np.loadtxt(df, delimiter = ',')
 nuevaData = []
 cantDatos = len(datosMerval)
