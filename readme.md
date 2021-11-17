@@ -1,3 +1,5 @@
+# Red neuronal con funciones de base radial - Método de k-medias
+
 Algoritmo de entrenamiento no supervisado con un método de k-medias para una red neuronal con funciones de base radial.
 
 El script prueba_Xor_Iris realiza un entrenamiento no supervisado con k-medias y funciones de base radial, para luego con esas neuronas entrenar la última capa de un
