@@ -1,80 +1,52 @@
-import math
-import random
-import matplotlib.pyplot as plt
 import numpy as np
 
-def kMedias(X, cantNeuronas, graficar):
-    # Definimos
-    centroides = []
-    centroidesAnt = np.zeros((cantNeuronas, len(X[0])))
-    n = len(X)
-    conjuntos = np.random.choice(cantNeuronas, n).transpose()
+def kMedias(X,cantNeuronas):
 
-    # Definimos centroidesRandom
-    for i in range(cantNeuronas):
-        indice = random.randint(0, n-1)
-        centroides.append(X[indice])
+    cantEntradas = len(X)
+    tamFeatures = len(X[0])
 
-    # Grafico inicial
-    if graficar:
-        plt.title('kMedias')
-        plt.xlabel("X1")
-        plt.ylabel("X2")
+    # 1- Inicialización: Se eligen k centroides con patrones al azar
+    posCentroides = np.random.randint(0,cantEntradas,cantNeuronas)
+    centroides = X[posCentroides]
 
-        # Graficamos los iniciales
+    conjuntos = np.zeros(cantEntradas)
+
+    maxIteraciones = 10000
+    it = 0
+    while it<maxIteraciones:
+        reasignaciones = False
+
+        # 2- Se reasignan los patrones al centroide mas cercano:
+        for i in range(cantEntradas):
+            distancias = np.zeros(cantNeuronas)
+            for j in range(cantNeuronas):
+                distancias[j] = np.linalg.norm(X[i][:]-centroides[j][:])
+            centroideMin = np.argmin(distancias)
+            if centroideMin != conjuntos[i]:
+                reasignaciones = True
+            conjuntos[i] = centroideMin
+
+        # Si no hubo reasignaciones, corto
+        if not reasignaciones:
+            break
+
+        # Calculo el tamaño de cada conjunto
+        tamConjuntos = np.zeros(cantNeuronas)
         for i in range(cantNeuronas):
-            promLargo = (centroides[i][0] + centroides[i][1]) / 2
-            promAncho = (centroides[i][2] + centroides[i][3]) / 2
-            plt.scatter(promAncho, promLargo, marker='*', c='red')
+            valoresi = conjuntos == i
+            tamConjuntos[i] = len(conjuntos[valoresi])
+            # Para evitar la división por 0
+            if tamConjuntos[i] == 0:
+                tamConjuntos[i] = 1
 
-    # whileamo
-    cambioCentroide = True
-    while cambioCentroide:
-        cambioCentroide = False
-
-        # Para todas los patrones, buscamos el menor centroide
-        for i in range(n):  # Para cada patrón
-            distCentroide = math.dist(X[i], centroides[0])
-            indiceMenorCentroide = 0
-            for j in range(1, cantNeuronas):  # Cada centroide
-                distAux = math.dist(X[i], centroides[j])
-                if distCentroide > distAux:
-                    distCentroide = distAux
-                    indiceMenorCentroide = j
-            conjuntos[i] = indiceMenorCentroide
-
-        # En este punto tengo actualizados mis nuevos conjuntos BIEN
-
-        # Actualizar centroides
-        for j in range(cantNeuronas):
-            sumaCentroide = np.zeros(len(X[0]))
-            cantCentroide = 0
-            for i in range(n):  # Todos los patrones
-                if conjuntos[i] == j:
-                    sumaCentroide = sumaCentroide + X[i]
-                    cantCentroide = cantCentroide + 1
-            # Promedio
-            for i in range(len(sumaCentroide)):
-                if cantCentroide==0:
-                    cantCentroide = 1
-                centroides[j][i] = sumaCentroide[i] / cantCentroide
-
-            # Me fijo si cambió, y lo reasigno
-            if (centroides[j] != centroidesAnt[j]).any():
-                cambioCentroide = True
-                centroidesAnt[j] = centroides[j]
-
-    if graficar:
-        vColor = ["yellow", "blue", "black", "violet", "brown", "purple", "pink", "grey", "cyan", "orange"]
-        for i in range(n):
-            promLargo = (X[i][0] + X[i][1]) / 2
-            promAncho = (X[i][2] + X[i][3]) / 2
-            plt.scatter(promAncho, promLargo, marker='+', c=vColor[conjuntos[i]])
-
+        # Calculo los centroides
         for i in range(cantNeuronas):
-            promLargo = (centroides[i][0] + centroides[i][1]) / 2
-            promAncho = (centroides[i][2] + centroides[i][3]) / 2
-            plt.scatter(promAncho, promLargo, marker='*', c='green')
+            sumatoria = np.zeros(tamFeatures)
+            for j in range(cantEntradas):
+                if conjuntos[j] == i:
+                    sumatoria += X[j][:]
+            centroides[i][:] = sumatoria / tamConjuntos[i]
 
-        plt.show()
+        it += 1
+
     return centroides
